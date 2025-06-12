@@ -23,9 +23,9 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
     ];
 
     /**
-     * @throws MappingException
+     * @throws MappingException|WriteException|ReadException
      */
-    public function __construct(private Filesystem $filesystem) {
+    public function __construct(private readonly Filesystem $filesystem) {
         if (!$this->filesystem->exists(self::FILE_NAME)) {
             $this->makeFile();
         }
@@ -46,6 +46,7 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
     /**
      * @param Address $address
      * @return void
+     * @throws WriteException
      */
     public function persist(Address $address): void {
         $itemExists = false;
@@ -117,10 +118,11 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
         }
 
         $mappedResults = [];
+
         foreach ($arrayResults as $arrayResult) {
-            if (is_array($arrayResult)) {
-                $mappedResults[] = $this->map($arrayResult);
-            }
+            //@var array{'first_name': string, "last_name": string, "phone": string, "email": string} arrayResult
+            $this->validateResult($arrayResult);
+            $mappedResults[] = $this->map($arrayResult);
         }
         return $mappedResults;
     }
@@ -142,23 +144,23 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
     /**
      * @param array{'first_name': string, "last_name": string, "phone": string, "email": string} $result
      * @return Address
-     * @throws MappingException
      */
     private function map(array $result): Address {
-
-       $this->validateArrayResult($result);
        return new Address($result["first_name"], $result["last_name"], $result["phone"], $result["email"]);
     }
 
 
     /**
-     * @param array{'first_name': string, "last_name": string, "phone": string, "email": string} $arrayResult
+     * @param mixed $result
      * @return void
      * @throws MappingException
      */
-    private function validateArrayResult(array $arrayResult): void {
+    private function validateResult(mixed $result): void {
+        if (!is_array($result)) {
+            throw new MappingException("Could not validate result: result is not an array.");
+        }
         foreach (self::REQUIRED_FIELDS as $fieldName) {
-            if (!isset($arrayResult[$fieldName])) {
+            if (!isset($result[$fieldName])) {
                 throw new MappingException(sprintf("The field %s is required", $fieldName));
             }
         }

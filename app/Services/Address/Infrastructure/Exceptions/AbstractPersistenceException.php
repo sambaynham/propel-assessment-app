@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Address\Infrastructure\Exceptions;
 
-class WriteException extends AbstractPersistenceException
+abstract class AbstractPersistenceException extends \Exception
 {
 
 }
