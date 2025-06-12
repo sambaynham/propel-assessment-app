@@ -8,8 +8,8 @@ class Address implements AddressInterface {
     public function __construct(
         private string $firstName,
         private string $lastName,
-        private ? string $phone,
-        private ? string $email
+        private string $phone,
+        private string $email
     ) {
 
     }
@@ -24,12 +24,12 @@ class Address implements AddressInterface {
         return $this->lastName;
     }
 
-    public function getPhone(): ?string
+    public function getPhone(): string
     {
         return $this->phone;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -57,10 +57,10 @@ class Address implements AddressInterface {
     public function jsonSerialize(): mixed
     {
         return [
-            'first_name' => $this->firstName,
-            'last_name' => $this->lastName,
-            'phone' => $this->phone,
-            'email' => $this->email,
+            'first_name' => $this->getFirstName(),
+            'last_name' => $this->getLastName(),
+            'phone' => $this->getPhone(),
+            'email' => $this->getEmail(),
         ];
     }
 }

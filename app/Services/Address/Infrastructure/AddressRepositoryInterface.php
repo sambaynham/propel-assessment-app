@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Address\Infrastructure;
+
+use App\Services\Address\Domain\Address;
+
+interface AddressRepositoryInterface
+{
+    public function persist(Address $address): void;
+
+    public function loadById(string $identifier): ? Address;
+}

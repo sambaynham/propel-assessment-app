@@ -10,9 +10,9 @@ interface AddressInterface extends \JsonSerializable
 
     public function getLastName(): string;
 
-    public function getPhone(): ?string;
+    public function getPhone(): string;
 
-    public function getEmail(): ?string;
+    public function getEmail(): string;
 
     public function setFirstName(string $firstName): void;
 
