@@ -10,5 +10,7 @@ interface AddressRepositoryInterface
 {
     public function persist(Address $address): void;
 
+    public function delete(Address $address): void;
+
     public function loadById(string $identifier): ? Address;
 }

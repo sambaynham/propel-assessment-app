@@ -5,19 +5,14 @@ declare(strict_types=1);
 namespace App\Services\Address\Infrastructure;
 
 use App\Services\Address\Domain\Address;
+use App\Services\Address\Infrastructure\Exceptions\ReadException;
+use App\Services\Address\Infrastructure\Exceptions\WriteException;
 use App\Services\Address\Infrastructure\Exceptions\MappingException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 
 
 class AddressRepository implements AddressRepositoryInterface, AddressSearchInterface
 {
-
-    public function __construct(private Filesystem $filesystem) {
-        if (!$this->filesystem->exists(self::FILE_NAME)) {
-            $this->makeFile();
-        }
-        $this->collection = $this->decodeFile();
-    }
     private const string FILE_NAME = 'persistence.json';
 
     private const array REQUIRED_FIELDS = [
@@ -26,6 +21,17 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
         'phone',
         'email'
     ];
+
+    /**
+     * @throws MappingException
+     */
+    public function __construct(private Filesystem $filesystem) {
+        if (!$this->filesystem->exists(self::FILE_NAME)) {
+            $this->makeFile();
+        }
+        $this->collection = $this->decodeFile();
+    }
+
 
     /**
      * By memoizing our data set like this, we keep our 'database' in memory, allowing for much quicker searching.
@@ -37,6 +43,10 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
     private array $collection;
 
 
+    /**
+     * @param Address $address
+     * @return void
+     */
     public function persist(Address $address): void {
         $itemExists = false;
         foreach ($this->collection as $delta => $item) {
@@ -53,36 +63,64 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
     }
 
     /**
+     * @param Address $address
+     * @return void
+     */
+    public function delete(Address $address): void {
+        foreach ($this->collection as $delta => $item) {
+            if ($item->getEmail() === $address->getEmail()) {
+                unset($this->collection[$delta]);
+            }
+        }
+    }
+
+    /**
      * @param string $identifier
      *
      * @return Address|null
      */
     public function loadById(string $identifier): ? Address {
 
-        return array_find($this->collection, fn($item) => $item->getEmail() === $identifier);
-
+        $item = \array_find($this->collection, fn($item) => $item->getEmail() === $identifier);
+        return $item instanceof Address ? $item : null;
     }
 
     /**
      * If we don't have a working file, create it and encode an empty array in it.
+     *
      * @return void
+     * @throws WriteException
      */
     private function makeFile(): void {
-        $this->filesystem->put(self::FILE_NAME, json_encode([]));
+        $emptyResult = json_encode([]);
+        if ($emptyResult === false) {
+            throw new WriteException("Json Encode failed. Are the correct extensions installed?");
+        }
+        $this->filesystem->put(self::FILE_NAME, $emptyResult);
 
     }
 
     /**
      * @return array<Address>
      *
-     * @throws MappingException
+     * @throws MappingException|ReadException
      */
     private function decodeFile(): array {
 
-        $arrayResults = json_decode($this->filesystem->get(self::FILE_NAME), true);
+        $fileContents = $this->filesystem->get(self::FILE_NAME);
+        if ($fileContents === null) {
+            throw new ReadException("File could not be read.");
+        }
+        $arrayResults = json_decode($fileContents, true);
+        if ($arrayResults === false || !is_array($arrayResults)) {
+            throw new ReadException("Could not read from persistence JSON. Please check storage layer.");
+        }
+
         $mappedResults = [];
-        foreach ($arrayResults as $delta => $arrayResult) {
-            $mappedResults[$delta] = $this->map($arrayResult);
+        foreach ($arrayResults as $arrayResult) {
+            if (is_array($arrayResult)) {
+                $mappedResults[] = $this->map($arrayResult);
+            }
         }
         return $mappedResults;
     }
@@ -91,12 +129,19 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
      * Commit the current contents of the collection to storage.
      *
      * @return void
+     * @throws WriteException
      */
     private function writeFile(): void {
-        $this->filesystem->put(self::FILE_NAME, json_encode($this->collection));
+        $encodedCollection = json_encode($this->collection);
+        if ($encodedCollection === false) {
+            throw new WriteException("Json Encode failed. Are the correct extensions installed?");
+        }
+        $this->filesystem->put(self::FILE_NAME, $encodedCollection);
     }
 
     /**
+     * @param array{'first_name': string, "last_name": string, "phone": string, "email": string} $result
+     * @return Address
      * @throws MappingException
      */
     private function map(array $result): Address {
@@ -105,7 +150,10 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
        return new Address($result["first_name"], $result["last_name"], $result["phone"], $result["email"]);
     }
 
+
     /**
+     * @param array{'first_name': string, "last_name": string, "phone": string, "email": string} $arrayResult
+     * @return void
      * @throws MappingException
      */
     private function validateArrayResult(array $arrayResult): void {
@@ -130,7 +178,7 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
      */
     public function search(string ...$searchTerms): iterable {
         $results = [];
-        foreach ($this->collection as $delta => $item) {
+        foreach ($this->collection as $item) {
             foreach ($searchTerms as $searchTerm) {
                 if (str_contains($item->getFirstName(), $searchTerm) || str_contains($item->getLastName(), $searchTerm)) {
                     $results[] = $item;

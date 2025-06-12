@@ -12,6 +12,13 @@ use Illuminate\Foundation\Testing\TestCase;
 class AddressRepositoryTest extends TestCase
 {
 
+    private function generateMockFileSystem(int $putCount = 0, ? string $getResults = null): Filesystem {
+        $mockFileSystem = $this->createMock(Filesystem::class);
+        $mockFileSystem->expects($this->exactly($putCount))->method('put')->willReturn(true);
+        $mockFileSystem->method('get')->willReturn($getResults);
+        return $mockFileSystem;
+    }
+
     public function testPersist(): void {
         $firstName = "Firstname";
         $lastName = "Lastname";
@@ -19,9 +26,8 @@ class AddressRepositoryTest extends TestCase
         $phoneNumber = "01234 567891";
 
         $address = new Address($firstName, $lastName, $phoneNumber, $emailAddress);
-        $mockFileSystem = $this->createMock(Filesystem::class);
-        $mockFileSystem->expects($this->exactly(2))->method('put')->willReturn(true);
-        $mockFileSystem->method('get')->willReturn('[{"first_name":"Firstname","last_name":"Lastname","phone":"01234 567891","email":"test@test.local"}]');
+
+        $mockFileSystem = $this->generateMockFileSystem(2, '[{"first_name":"Firstname","last_name":"Lastname","phone":"01234 567891","email":"test@test.local"}]');
         $repository = new AddressRepository($mockFileSystem);
         $repository->persist($address);
 
@@ -29,5 +35,21 @@ class AddressRepositoryTest extends TestCase
         self::assertEquals($result, $address);
     }
 
+    public function testDelete(): void {
+        $firstName = "Firstname";
+        $lastName = "Lastname";
+        $emailAddress = "test@test.local";
+        $phoneNumber = "01234 567891";
+        $address = new Address($firstName, $lastName, $phoneNumber, $emailAddress);
+
+        $mockFileSystem = $this->generateMockFileSystem(2, '[{"first_name":"Firstname","last_name":"Lastname","phone":"01234 567891","email":"test@test.local"}]');
+        $repository = new AddressRepository($mockFileSystem);
+        $repository->persist($address);
+        $result = $repository->loadById($emailAddress);
+        self::assertNotNull($result);
+        $repository->delete($result);
+        self::assertNull($repository->loadById($emailAddress));
+
+    }
 
 }
