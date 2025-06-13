@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Address\Domain;
 
+use App\Http\Requests\AddressPostRequest;
 use App\Services\Address\Domain\Address;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -79,6 +80,7 @@ class AddressTest extends TestCase
         self::assertEquals($lastName, $address->getLastName());
         self::assertEquals($phone, $address->getPhone());
         self::assertEquals($email, $address->getEmail());
+        self::assertEquals(strtolower(urlencode($email)), $address->getUrlSafeEmail());
     }
 
     public function testJsonSerialize(): void {

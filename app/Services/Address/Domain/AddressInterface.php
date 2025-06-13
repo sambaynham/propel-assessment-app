@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Address\Domain;
 
+use App\Http\Requests\AddressPostRequest;
+
 interface AddressInterface extends \JsonSerializable
 {
+    public function getUrlSafeEmail(): string;
+
     public function getFirstName(): string;
 
     public function getLastName(): string;

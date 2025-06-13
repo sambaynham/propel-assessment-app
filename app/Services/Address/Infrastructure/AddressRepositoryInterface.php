@@ -13,4 +13,9 @@ interface AddressRepositoryInterface
     public function delete(Address $address): void;
 
     public function loadById(string $identifier): ? Address;
+
+    /**
+     * @return array<Address>
+     */
+    public function findAll(): array;
 }

@@ -1,0 +1,11 @@
+{% if session('success') %}
+    <span class="alert alert-success" role="alert">{{ session('success') }}</span>
+{% endif %}
+
+{% if session('warning') %}
+    <span class="alert alert-warning" role="alert">{{ session('warning') }}</span>
+{% endif %}
+
+{% if session('error') %}
+    <span class="alert alert-danger" role="alert">{{ session('danger') }}</span>
+{% endif %}

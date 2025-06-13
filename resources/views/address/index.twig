@@ -1,0 +1,71 @@
+{% extends 'base.base' %}
+{% block content %}
+    <div class="row m-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">{{ pageTitle }}</h1>
+                </div>
+                <div class="card-body">
+                    <form class="form" method="post">
+                        {{ csrf_field() }}
+                        <div class="input-group my-4">
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Search by name...">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+
+                    </form>
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>E-Mail Address</th>
+                            <th>Phone Number</th>
+                            <th>Operations</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                            {% if addresses is empty %}
+                            <tr>
+                                <td colspan="5">
+                                    There are no addresses currently in the system.
+                                </td>
+                            </tr>
+                            {% else %}
+                                {% for address in addresses %}
+                                    <tr>
+                                        <td>
+                                            {{ address.getFirstName }}
+                                        </td>
+                                        <td>
+                                            {{ address.getLastName }}
+                                        </td>
+                                        <td>
+                                            {{ address.getPhone }}
+                                        </td>
+                                        <td>
+                                            {{ address.getEmail }}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ route('address.edit', {
+                                                    'id': address.getUrlSafeEmail()
+                                                }) }}" class="btn btn-primary">Edit</a>
+                                                <a href="{{ route('address.deleteConfirm', {
+                                                    'id': address.getUrlSafeEmail()
+                                                }) }}" class="btn btn-danger">Delete</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <a class="btn btn-primary" href="{{ route('address.create') }}">Create a new Address</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

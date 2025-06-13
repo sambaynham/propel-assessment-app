@@ -59,6 +59,10 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
         if (!$itemExists) {
             $this->collection[] = $address;
         }
+        //Sort the collection by surname.
+        usort($this->collection, function($a, $b) {
+            return strcasecmp($a->getLastName(), $b->getLastName());
+        });
 
         $this->writeFile();
     }
@@ -66,6 +70,7 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
     /**
      * @param Address $address
      * @return void
+     * @throws WriteException
      */
     public function delete(Address $address): void {
         foreach ($this->collection as $delta => $item) {
@@ -73,6 +78,7 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
                 unset($this->collection[$delta]);
             }
         }
+        $this->writeFile();
     }
 
     /**
@@ -188,5 +194,10 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
             }
         }
         return $results;
+    }
+
+    public function findAll(): array
+    {
+        return $this->collection;
     }
 }

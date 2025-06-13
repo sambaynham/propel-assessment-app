@@ -1,0 +1,28 @@
+{% extends 'base.base' %}
+{% block content %}
+    <div class="row m-4">
+        <div class="col col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">{{ pageTitle }}</h1>
+                </div>
+                <div class="card-body">
+                    <form class="form" method="POST" action="{{ route('address.delete', {'id': address.getUrlSafeEmail}) }}">
+                        {{ method_field('delete') }}
+                        {{ csrf_field() }}
+                        <strong>This action cannot be undone!</strong>
+                        <div class="form-group required">
+                            <div class="form-check">
+                                <input class="form-check-input" required type="checkbox" value="" id="flexCheckIndeterminate">
+                                <label class="form-check-label" for="flexCheckIndeterminate">
+                                    I really want to delete this address.
+                                </label>
+                            </div>
+                        </div>
+                        <button class="btn btn-danger mt-4">Delete Address</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

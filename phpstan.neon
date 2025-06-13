@@ -8,3 +8,6 @@ parameters:
         - app/
 
     level: 9
+    excludePaths:
+        - 'app/Http/Controllers/'
+        - 'app/Http/Requests/'

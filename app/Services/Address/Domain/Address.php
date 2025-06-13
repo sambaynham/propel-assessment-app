@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Address\Domain;
 
+use App\Http\Requests\AddressPostRequest;
+
 class Address implements AddressInterface {
     public function __construct(
         private string $firstName,
         private string $lastName,
         private string $phone,
-        private string $email
+        private string $email,
     ) {
 
     }
@@ -62,5 +64,16 @@ class Address implements AddressInterface {
             'phone' => $this->getPhone(),
             'email' => $this->getEmail(),
         ];
+    }
+
+    /**
+     * This isn't a particularly good solution, but the storage format required of the JSON doesn't allow for a non-data key.
+     * The main issue with this would be the + character; it's valid in an e-mail address but would be stripped here.
+     *
+     * @return string
+     */
+    public function getUrlSafeEmail(): string
+    {
+        return strtolower(urlencode($this->getEmail()));
     }
 }

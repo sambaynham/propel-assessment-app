@@ -1,0 +1,63 @@
+{% extends 'base.base' %}
+{% block content %}
+    <div class="row m-4">
+        <div class="col col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">{{ pageTitle }}</h1>
+                </div>
+                <div class="card-body">
+                    <form class="form" method="POST" action="{{ route('address.patch', {'id': address.getUrlSafeEmail}) }}">
+                        {{ method_field('patch') }}
+                        {{ csrf_field() }}
+                        <div class="form-group required {% if errors.has('first_name') %}invalid{% endif %}">
+                            <label for="first_name">First Name</label>
+                            <input type="text" required class="form-control" id="first_name" name="first_name" value="{{ old('first_name', address.getFirstName) }}">
+                            {% if errors.has('first_name') %}
+                                <div class="alert alert-danger my-2">
+                                    {% for error in errors.get('first_name') %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group required {% if errors.has('last_name') %}invalid{% endif %}">
+                            <label for="last_name">Last Name</label>
+                            <input type="text" required class="form-control" id="last_name" name="last_name" value="{{ old('last_name', address.getLastName) }}">
+                            {% if errors.has('last_name') %}
+                                <div class="alert alert-danger my-2">
+                                    {% for error in errors.get('last_name') %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group required {% if errors.has('phone') %}invalid{% endif %}">
+                            <label for="phone">Phone</label>
+                            <input type="tel" required class="form-control" id="phone" name="phone" value="{{ old('phone', address.getPhone) }}">
+                            {% if errors.has('phone') %}
+                                <div class="alert alert-danger my-2">
+                                    {% for error in errors.get('phone') %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group required {% if errors.has('email') %}invalid{% endif %}">
+                            <label for="email">E-Mail</label>
+                            <input type="email" required class="form-control" id="email" name="email" value="{{ old('email', address.getEmail) }}">
+                            {% if errors.has('email') %}
+                                <div class="alert alert-danger my-2">
+                                    {% for error in errors.get('email') %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <button class="btn btn-primary mt-4">Save Address</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
