@@ -1,0 +1,13 @@
+{% extends 'base.base' %}
+{% set pageTitle = '500: Server error' %}
+{% set noDefaultH1 = true %}
+{% block content %}
+    <div class="row m-4">
+        <div class="col">
+            <strong>We're sorry; there's a problem on our end.</strong>
+            <p>This has been reported tp the team, and we'll fix it  as soon as possible.</p>
+            <a href="{{ route('visitor.address.index') }}">Back to Home Page</a>
+        </div>
+    </div>
+
+{% endblock %}

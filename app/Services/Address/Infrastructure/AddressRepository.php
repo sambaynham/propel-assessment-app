@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Address\Infrastructure;
 
-use ApiPlatform\Metadata\Operation;
 use App\Services\Address\Domain\Address;
 use App\Services\Address\Infrastructure\Exceptions\ReadException;
 use App\Services\Address\Infrastructure\Exceptions\WriteException;
 use App\Services\Address\Infrastructure\Exceptions\MappingException;
+use App\Services\Search\ElasticSearchService;
 use Illuminate\Contracts\Filesystem\Filesystem;
 
-class AddressRepository implements AddressRepositoryInterface, AddressSearchInterface
+class AddressRepository implements AddressRepositoryInterface
 {
     private const string FILE_NAME = 'persistence.json';
 
@@ -35,7 +35,9 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
     /**
      * @throws MappingException|WriteException|ReadException
      */
-    public function __construct(private readonly Filesystem $filesystem) {
+    public function __construct(
+        private readonly Filesystem $filesystem
+    ) {
         if (!$this->filesystem->exists(self::FILE_NAME)) {
             $this->makeFile();
         }
@@ -56,6 +58,7 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
             }
         }
         if (!$itemExists) {
+//            $this->elasticSearchService->populateIndex($item->toArray());
             $this->collection[] = $address;
         }
         //Sort the collection by surname.

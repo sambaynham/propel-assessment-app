@@ -8,20 +8,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AddressPatchRequest;
 use App\Http\Requests\AddressPostRequest;
 use App\Services\Address\Domain\Address;
-use App\Services\Address\Infrastructure\AddressRepositoryInterface;
+use App\Services\Address\Service\AddressServiceInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 
 class AddressController extends Controller
 {
-    public function __construct(private AddressRepositoryInterface $addressRepository) {
+    public function __construct(private readonly AddressServiceInterface $addressService) {
 
     }
     public function index(Request $request): mixed {
         $pageVars = [
             'pageTitle' => 'Addresses',
-            'addresses' => $this->addressRepository->findAll(),
+            'addresses' => $this->addressService->findAll(),
             'breadcrumbs' => [
                 [
                     'path' => route('visitor.address.index'),
@@ -34,7 +34,7 @@ class AddressController extends Controller
     }
 
     public function get(Request $request, string $id): mixed {
-        $address = $this->addressRepository->loadById(urldecode($id));
+        $address = $this->addressService->loadById(urldecode($id));
         if (null === $address) {
             abort(404);
         }
@@ -60,7 +60,7 @@ class AddressController extends Controller
     public function create(Request $request): mixed {
         $pageVars = [
             'pageTitle' => 'Create a new Address',
-            'addresses' => $this->addressRepository->findAll(),
+            'addresses' => $this->addressService->findAll(),
             'breadcrumbs' => [
                 [
                     'path' => route('visitor.address.index'),
@@ -85,12 +85,12 @@ class AddressController extends Controller
             $request->input('phone'),
             $request->input('email')
         );
-        $this->addressRepository->persist($address);
+        $this->addressService->save($address);
         return redirect()->route('visitor.address.index')->with('success', 'Address has been created');
     }
 
     public function edit(string $id): mixed {
-        $address = $this->addressRepository->loadById(urldecode($id));
+        $address = $this->addressService->loadById(urldecode($id));
         if (null === $address) {
             abort(404);
         }
@@ -119,7 +119,7 @@ class AddressController extends Controller
     }
 
     public function patch(AddressPatchRequest $request, string $id): RedirectResponse {
-        $address = $this->addressRepository->loadById(urldecode($id));
+        $address = $this->addressService->loadById(urldecode($id));
         if (null === $address) {
             abort(404);
         }
@@ -127,12 +127,12 @@ class AddressController extends Controller
         $address->setLastName($request->input('last_name'));
         $address->setPhone($request->input('phone'));
         $address->setEmail($request->input('email'));
-        $this->addressRepository->persist($address);
+        $this->addressService->save($address);
         return redirect()->route('visitor.address.index')->with('success', sprintf("Address %s has been updated", $address->getEmail()));
     }
 
     public function deleteConfirm(Request $request, string $id): mixed {
-        $address = $this->addressRepository->loadById(urldecode($id));
+        $address = $this->addressService->loadById(urldecode($id));
         if (null === $address) {
             abort(404);
         }
@@ -161,11 +161,11 @@ class AddressController extends Controller
     }
 
     public function delete(Request $request, string $id): RedirectResponse {
-        $address = $this->addressRepository->loadById(urldecode($id));
+        $address = $this->addressService->loadById(urldecode($id));
         if (null === $address) {
             abort(404);
         }
-        $this->addressRepository->delete($address);
+        $this->addressService->delete($address);
         return redirect()->route('visitor.address.index')->with('success', sprintf("Address %s has been deleted", $address->getEmail()));
     }
 

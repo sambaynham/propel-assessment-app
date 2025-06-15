@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Rules\UniqueEmailRule;
-use App\Services\Address\Infrastructure\AddressRepositoryInterface;
+use App\Services\Address\Service\AddressServiceInterface;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AddressPostRequest extends AbstractAddressRequest
@@ -27,7 +27,7 @@ class AddressPostRequest extends AbstractAddressRequest
     public function rules(): array
     {
         $rules = parent::rules();
-        $rules['email'][] = new UniqueEmailRule($this->container->get(AddressRepositoryInterface::class));
+        $rules['email'][] = new UniqueEmailRule($this->container->get(AddressServiceInterface::class));
         return $rules;
     }
 }

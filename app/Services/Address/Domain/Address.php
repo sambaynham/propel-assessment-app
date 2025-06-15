@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Address\Domain;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\QueryParameter;
 use App\Services\Address\Application\ApiPlatformAddressProcessor;
 use App\Services\Address\Application\ApiPlatformAddressProvider;
@@ -29,6 +30,9 @@ use App\Services\Address\Application\ApiPlatformAddressProvider;
         ]
     ]
 )]
+#[GetCollection(uriTemplate: '/', parameters: [
+    'page' => new QueryParameter
+])]
 class Address implements AddressInterface {
     public function __construct(
         private string $firstName,

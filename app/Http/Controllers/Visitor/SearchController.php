@@ -6,12 +6,14 @@ namespace App\Http\Controllers\Visitor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SearchRequest;
-use App\Services\Address\Infrastructure\AddressSearchInterface;
+use App\Services\Search\ElasticSearchService;
 use Symfony\Component\HttpFoundation\Response;
 
 class SearchController extends Controller
 {
-    public function __construct(private AddressSearchInterface $searchService) {}
+    public function __construct(
+        private ElasticSearchService $searchService
+    ) {}
     private const string SEARCH_SANITIZE_PATTERN = '/[^A-Za-z0-9 @ +_\-.]/';
 
     public function post(SearchRequest $request): mixed {

@@ -9,7 +9,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\ProcessorInterface;
 use App\Services\Address\Domain\Address;
-use App\Services\Address\Infrastructure\AddressRepositoryInterface;
+use App\Services\Address\Service\AddressServiceInterface;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
@@ -17,21 +17,21 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 class ApiPlatformAddressProcessor implements ProcessorInterface {
 
-    public function __construct(private AddressRepositoryInterface $addressRepository) {
+    public function __construct(private AddressServiceInterface $addressService) {
     }
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = [])
     {
         if ($operation instanceof DeleteOperationInterface) {
-            $this->addressRepository->delete($data);
+            $this->addressService->delete($data);
         } else {
             if ($operation instanceof Post) {
-                $existingAddress = $this->addressRepository->loadByEmail($data->getEmail());
+                $existingAddress = $this->addressService->loadByEmail($data->getEmail());
                 if (null !== $existingAddress) {
                     throw new UnprocessableEntityHttpException("An address with this email address already exists.");
                 }
             }
-            $this->addressRepository->persist($data);
+            $this->addressService->save($data);
         }
 
         return $data;

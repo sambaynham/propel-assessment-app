@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Rules\UniqueEmailRule;
-use App\Services\Address\Infrastructure\AddressRepositoryInterface;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Services\Address\Service\AddressServiceInterface;
+
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -33,7 +33,7 @@ class AddressPatchRequest extends AbstractAddressRequest
         $idToIgnore = is_string($this->input('id')) ? $this->input('id') : null;
         $rules['email'][] = new UniqueEmailRule(
             $this->container->get(
-                AddressRepositoryInterface::class
+                AddressServiceInterface::class
             ),
             $idToIgnore
         );
