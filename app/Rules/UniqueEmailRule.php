@@ -11,7 +11,7 @@ class UniqueEmailRule implements ValidationRule
 {
     public function __construct(
         private AddressRepositoryInterface $addressRepository,
-        private ? string $addressToIgnore = null
+        private ? string $idToIgnore = null
     ) {
     }
 
@@ -24,8 +24,11 @@ class UniqueEmailRule implements ValidationRule
     {
         if (!is_string($value)) {
             $fail('The e-mail address must be a string.');
-        } elseif ($value !== $this->addressToIgnore && $this->addressRepository->loadById($value)) {
-            $fail(sprintf('An entry with the e-mail address %s already exists.', $value));
+        } else {
+            $existingAddress = $this->addressRepository->loadByEmail($value);
+            if ($existingAddress && $existingAddress->getId() !== $this->idToIgnore) {
+                $fail(sprintf('An entry with the e-mail address %s already exists.', $value));
+            }
         }
     }
 }

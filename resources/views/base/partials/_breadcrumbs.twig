@@ -4,7 +4,6 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     {% for breadcrumb in breadcrumbs %}
-
                         <li class="breadcrumb-item {% if breadcrumb.active == true %} true{% endif %}">
                             <a href="{{ breadcrumb.path }}">
                                 {{ breadcrumb.label }}

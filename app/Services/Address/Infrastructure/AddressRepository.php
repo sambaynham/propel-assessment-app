@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Address\Infrastructure;
 
+use ApiPlatform\Metadata\Operation;
 use App\Services\Address\Domain\Address;
 use App\Services\Address\Infrastructure\Exceptions\ReadException;
 use App\Services\Address\Infrastructure\Exceptions\WriteException;
 use App\Services\Address\Infrastructure\Exceptions\MappingException;
 use Illuminate\Contracts\Filesystem\Filesystem;
-
 
 class AddressRepository implements AddressRepositoryInterface, AddressSearchInterface
 {
@@ -50,7 +50,7 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
     public function persist(Address $address): void {
         $itemExists = false;
         foreach ($this->collection as $delta => $item) {
-            if ($item->getEmail()  === $address->getEmail()) {
+            if ($item->getId()  === $address->getId()) {
                 $this->collection[$delta] = $address;
                 $itemExists = true;
             }
@@ -73,7 +73,7 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
      */
     public function delete(Address $address): void {
         foreach ($this->collection as $delta => $item) {
-            if ($item->getEmail() === $address->getEmail()) {
+            if ($item->getId() === $address->getId()) {
                 unset($this->collection[$delta]);
             }
         }
@@ -86,8 +86,7 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
      * @return Address|null
      */
     public function loadById(string $identifier): ? Address {
-
-        $item = \array_find($this->collection, fn($item) => $item->getEmail() === $identifier);
+        $item = \array_find($this->collection, fn($item) => $item->getId() === $identifier);
         return $item instanceof Address ? $item : null;
     }
 
@@ -139,7 +138,17 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
      * @throws WriteException
      */
     private function writeFile(): void {
-        $encodedCollection = json_encode($this->collection);
+        //Trim out the generated Id: we don't want this as part of our persisted data.
+        $trimmedCollection = array_map(
+            function ($item) {
+                $itemArray = $item->jsonSerialize();
+                if (isset($itemArray['id'])) {
+                    unset($itemArray['id']);
+                }
+                return $itemArray;
+            },
+            $this->collection);
+        $encodedCollection = json_encode($trimmedCollection);
         if ($encodedCollection === false) {
             throw new WriteException("Json Encode failed. Are the correct extensions installed?");
         }
@@ -187,8 +196,8 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
         $results = [];
         foreach ($this->collection as $item) {
             foreach ($searchTerms as $searchTerm) {
-                if (str_contains(strtolower($item->getFirstName()), strtolower($searchTerm)) || str_contains(strtolower($item->getLastName()), strtolower($searchTerm)) && !isset($results[$item->getEmail()])) {
-                    $results[$item->getEmail()] = $item;
+                if (str_contains(strtolower($item->getFirstName()), strtolower($searchTerm)) || str_contains(strtolower($item->getLastName()), strtolower($searchTerm)) && !isset($results[$item->getId()])) {
+                    $results[$item->getId()] = $item;
                 }
             }
         }
@@ -198,5 +207,10 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
     public function findAll(): array
     {
         return $this->collection;
+    }
+
+    public function loadByEmail(string $email): ?Address
+    {
+        return array_find($this->collection, fn($item) => $item->getEmail() === $email);
     }
 }

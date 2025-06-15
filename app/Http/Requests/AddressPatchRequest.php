@@ -26,14 +26,16 @@ class AddressPatchRequest extends AbstractAddressRequest
     public function rules(): array
     {
         $rules = parent::rules();
-
-        $emailAddressToIgnore = is_string($this->input('email')) ? $this->input('email') : null;
-
+        $rules['id'] = [
+            'string',
+            'required',
+        ];
+        $idToIgnore = is_string($this->input('id')) ? $this->input('id') : null;
         $rules['email'][] = new UniqueEmailRule(
             $this->container->get(
                 AddressRepositoryInterface::class
             ),
-            $emailAddressToIgnore
+            $idToIgnore
         );
 
         return $rules;

@@ -7,7 +7,7 @@
                     <h1 class="card-title">{{ pageTitle }}</h1>
                 </div>
                 <div class="card-body">
-                    <form class="form" method="POST" action="{{ route('address.post') }}">
+                    <form class="form" method="POST" action="{{ route('visitor.address.post') }}">
                         {{ csrf_field() }}
                         <div class="form-group required {% if errors.has('first_name') %}invalid{% endif %}">
                             <label for="first_name">First Name</label>

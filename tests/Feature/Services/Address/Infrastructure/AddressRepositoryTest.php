@@ -16,6 +16,39 @@ use PHPUnit\Framework\MockObject\Exception;
 class AddressRepositoryTest extends TestCase
 {
 
+    private const array TEST_ADDRESSES = [
+        [
+            'firstName' => 'David',
+            'lastName' => 'Platt',
+            'phone' => '01913478234',
+            'email' => 'david.platt@corrie.co.uk'
+        ],
+        [
+            'firstName' => 'Jason',
+            'lastName' => 'Grimshaw',
+            'phone' => '01913478123',
+            'email' => 'jason.grimshaw@corrie.co.uk.'
+        ],
+        [
+            'firstName' => 'Ken',
+            'lastName' => 'Barlow',
+            'phone' => '019134784929',
+            'email' => 'ken.barlow@corrie.co.uk'
+        ],
+        [
+            'firstName' => 'Rita',
+            'lastName' => 'Sullivan',
+            'phone' => '01913478555',
+            'email' => 'rita.sullivan@corrie.co.uk'
+        ],
+        [
+            'firstName' => 'Steve',
+            'lastName' => 'McDonald',
+            'phone' => '01913478555',
+            'email' => 'steve.mcdonald@corrie.co.uk'
+        ]
+    ];
+
     /**
      * @throws Exception
      */
@@ -42,9 +75,11 @@ class AddressRepositoryTest extends TestCase
         $repository = new AddressRepository($mockFileSystem);
         $repository->persist($address);
 
-        $result = $repository->loadById($emailAddress);
+        $result = $repository->loadById($address->getId());
         self::assertEquals($result, $address);
     }
+
+
 
     /**
      * @throws WriteException
@@ -61,10 +96,10 @@ class AddressRepositoryTest extends TestCase
         $mockFileSystem = $this->generateMockFileSystem(3, '[{"first_name":"Firstname","last_name":"Lastname","phone":"01234 567891","email":"test@test.local"}]');
         $repository = new AddressRepository($mockFileSystem);
         $repository->persist($address);
-        $result = $repository->loadById($emailAddress);
+        $result = $repository->loadById($address->getId());
         self::assertNotNull($result);
         $repository->delete($result);
-        self::assertNull($repository->loadById($emailAddress));
+        self::assertNull($repository->loadById($address->getId()));
     }
 
     /**
@@ -76,41 +111,10 @@ class AddressRepositoryTest extends TestCase
     {
         $mockFileSystem = $this->generateMockFileSystem(6, '[]');
         $repository = new AddressRepository($mockFileSystem);
-        $addresses = [
-            [
-                'firstName' => 'David',
-                'lastName' => 'Platt',
-                'phone' => '01913478234',
-                'email' => 'david.platt@corrie.co.uk'
-            ],
-            [
-                'firstName' => 'Jason',
-                'lastName' => 'Grimshaw',
-                'phone' => '01913478123',
-                'email' => 'jason.grimshaw@corrie.co.uk.'
-            ],
-            [
-                'firstName' => 'Ken',
-                'lastName' => 'Barlow',
-                'phone' => '019134784929',
-                'email' => 'ken.barlow@corrie.co.uk'
-            ],
-            [
-                'firstName' => 'Rita',
-                'lastName' => 'Sullivan',
-                'phone' => '01913478555',
-                'email' => 'rita.sullivan@corrie.co.uk'
-            ],
-            [
-                'firstName' => 'Steve',
-                'lastName' => 'McDonald',
-                'phone' => '01913478555',
-                'email' => 'steve.mcdonald@corrie.co.uk'
-            ]
-        ];
+
         $addressCollection = array_map(function ($address) {
             return new Address($address['firstName'], $address['lastName'], $address['phone'], $address['email']);
-        }, $addresses);
+        }, self::TEST_ADDRESSES);
 
         foreach ($addressCollection as $address) {
             $repository->persist($address);
@@ -122,6 +126,26 @@ class AddressRepositoryTest extends TestCase
         });
 
         self::assertEquals($addressCollection, $repository->findAll());
+    }
+
+    /**
+     * @throws ReadException
+     * @throws Exception
+     * @throws MappingException
+     * @throws WriteException
+     */
+    public function testFindByEmail(): void {
+        $mockFileSystem = $this->generateMockFileSystem(6, '[]');
+        $repository = new AddressRepository($mockFileSystem);
+        $addressCollection = array_map(function ($address) {
+            return new Address($address['firstName'], $address['lastName'], $address['phone'], $address['email']);
+        }, self::TEST_ADDRESSES);
+        foreach ($addressCollection as $address) {
+            $repository->persist($address);
+        }
+
+        self::assertNotNull($repository->loadByEmail('david.platt@corrie.co.uk'));
+        self::assertNull($repository->loadByEmail('some.nonexistent.email@test.dev'));
     }
 
 }

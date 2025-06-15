@@ -7,7 +7,7 @@
                     <h2 class="card-title">Search</h2>
                 </div>
                 <div class="card-body">
-                    {% embed 'address.partials._search' %}{% endembed %}
+                    {% embed 'search.partials._search' %}{% endembed %}
                 </div>
             </div>
         </div>
@@ -22,7 +22,7 @@
                 </div>
                 <div class="card-body">
                    {%  embed 'address.partials._addresstable' with {'addresses': addresses} %}{% endembed %}
-                    <a class="btn btn-primary" href="{{ route('address.create') }}">Create a new Address</a>
+                    <a class="btn btn-primary" href="{{ route('visitor.address.create') }}">Create a new Address</a>
                 </div>
             </div>
         </div>

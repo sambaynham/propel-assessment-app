@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Visitor;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\AddressPatchRequest;
 use App\Http\Requests\AddressPostRequest;
 use App\Services\Address\Domain\Address;
@@ -23,7 +24,7 @@ class AddressController extends Controller
             'addresses' => $this->addressRepository->findAll(),
             'breadcrumbs' => [
                 [
-                    'path' => route('address.index'),
+                    'path' => route('visitor.address.index'),
                     'label' =>  'Addresses',
                     'active' => false
                 ]
@@ -42,12 +43,12 @@ class AddressController extends Controller
             'address' => $address,
             'breadcrumbs' => [
                 [
-                    'path' => route('address.index'),
+                    'path' => route('visitor.address.index'),
                     'label' =>  'Addresses',
                     'active' => false
                 ],
                 [
-                    'path' => route('address.get', ['id' => $address->getUrlSafeEmail()]),
+                    'path' => route('visitor.address.get', ['id' => $address->getId()]),
                     'label' =>  $address->getEmail(),
                     'active' => true
                 ]
@@ -62,7 +63,7 @@ class AddressController extends Controller
             'addresses' => $this->addressRepository->findAll(),
             'breadcrumbs' => [
                 [
-                    'path' => route('address.index'),
+                    'path' => route('visitor.address.index'),
                     'label' =>  'Addresses',
                     'active' => false
                 ],
@@ -85,7 +86,7 @@ class AddressController extends Controller
             $request->input('email')
         );
         $this->addressRepository->persist($address);
-        return redirect()->route('address.index')->with('success', 'Address has been created');
+        return redirect()->route('visitor.address.index')->with('success', 'Address has been created');
     }
 
     public function edit(string $id): mixed {
@@ -98,17 +99,17 @@ class AddressController extends Controller
             'address' => $address,
             'breadcrumbs' => [
                 [
-                    'path' => route('address.index'),
+                    'path' => route('visitor.address.index'),
                     'label' =>  'Addresses',
                     'active' => false
                 ],
                 [
-                    'path' => route('address.get', ['id' => $address->getUrlSafeEmail()]),
+                    'path' => route('visitor.address.get', ['id' => $address->getId()]),
                     'label' =>  $address->getEmail(),
                     'active' => true
                 ],
                 [
-                    'path' => route('address.edit', ['id' => $address->getUrlSafeEmail()]),
+                    'path' => route('visitor.address.edit', ['id' => $address->getId()]),
                     'label' =>  'Edit',
                     'active' => true
                 ]
@@ -127,7 +128,7 @@ class AddressController extends Controller
         $address->setPhone($request->input('phone'));
         $address->setEmail($request->input('email'));
         $this->addressRepository->persist($address);
-        return redirect()->route('address.index')->with('success', sprintf("Address %s has been updated", $address->getEmail()));
+        return redirect()->route('visitor.address.index')->with('success', sprintf("Address %s has been updated", $address->getEmail()));
     }
 
     public function deleteConfirm(Request $request, string $id): mixed {
@@ -140,17 +141,17 @@ class AddressController extends Controller
             'address' => $address,
             'breadcrumbs' => [
                 [
-                    'path' => route('address.index'),
+                    'path' => route('visitor.address.index'),
                     'label' =>  'Addresses',
                     'active' => false
                 ],
                 [
-                    'path' => route('address.get', ['id' => $address->getUrlSafeEmail()]),
+                    'path' => route('visitor.address.get', ['id' => $address->getId()]),
                     'label' =>  $address->getEmail(),
                     'active' => true
                 ],
                 [
-                    'path' => route('address.deleteConfirm', ['id' => $address->getUrlSafeEmail()]),
+                    'path' => route('visitor.address.deleteConfirm', ['id' => $address->getId()]),
                     'label' =>  'Delete',
                     'active' => true
                 ]
@@ -165,7 +166,7 @@ class AddressController extends Controller
             abort(404);
         }
         $this->addressRepository->delete($address);
-        return redirect()->route('address.index')->with('success', sprintf("Address %s has been deleted", $address->getEmail()));
+        return redirect()->route('visitor.address.index')->with('success', sprintf("Address %s has been deleted", $address->getEmail()));
     }
 
 }

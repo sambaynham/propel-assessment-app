@@ -12,7 +12,9 @@ interface AddressRepositoryInterface
 
     public function delete(Address $address): void;
 
-    public function loadById(string $identifier): ? Address;
+    public function loadById(string $identifier): ?Address;
+
+    public function loadByEmail(string $email): ?Address;
 
     /**
      * @return array<Address>

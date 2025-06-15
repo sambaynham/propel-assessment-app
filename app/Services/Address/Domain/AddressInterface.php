@@ -8,7 +8,7 @@ use App\Http\Requests\AddressPostRequest;
 
 interface AddressInterface extends \JsonSerializable
 {
-    public function getUrlSafeEmail(): string;
+    public function getId(): string;
 
     public function getFirstName(): string;
 

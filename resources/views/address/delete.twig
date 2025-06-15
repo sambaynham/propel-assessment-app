@@ -7,7 +7,7 @@
                     <h1 class="card-title">{{ pageTitle }}</h1>
                 </div>
                 <div class="card-body">
-                    <form class="form" method="POST" action="{{ route('address.delete', {'id': address.getUrlSafeEmail}) }}">
+                    <form class="form" method="POST" action="{{ route('visitor.address.delete', {'id': address.getId}) }}">
                         {{ method_field('delete') }}
                         {{ csrf_field() }}
                         <strong>This action cannot be undone!</strong>

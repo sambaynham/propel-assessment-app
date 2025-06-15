@@ -1,11 +1,24 @@
-{% if session('success') %}
-    <span class="alert alert-success" role="alert">{{ session('success') }}</span>
-{% endif %}
+{% if session('success') or session('warning') or session('info') or session('error') %}
+    <div class="container-fluid">
+        <div class="row my-4">
+            <div class="col">
+                {% if session('success') %}
+                    <span class="alert alert-success" role="alert">{{ session('success') }}</span>
+                {% endif %}
 
-{% if session('warning') %}
-    <span class="alert alert-warning" role="alert">{{ session('warning') }}</span>
-{% endif %}
+                {% if session('warning') %}
+                    <span class="alert alert-warning" role="alert">{{ session('warning') }}</span>
+                {% endif %}
 
-{% if session('error') %}
-    <span class="alert alert-danger" role="alert">{{ session('danger') }}</span>
+                {% if session('info') %}
+                    <span class="alert alert-info" role="alert">{{ session('info') }}</span>
+                {% endif %}
+                {% if session('error') %}
+                    <span class="alert alert-danger" role="alert">{{ session('danger') }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
 {% endif %}

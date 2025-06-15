@@ -80,7 +80,7 @@ class AddressTest extends TestCase
         self::assertEquals($lastName, $address->getLastName());
         self::assertEquals($phone, $address->getPhone());
         self::assertEquals($email, $address->getEmail());
-        self::assertEquals(strtolower(urlencode($email)), $address->getUrlSafeEmail());
+
     }
 
     public function testJsonSerialize(): void {
@@ -89,8 +89,15 @@ class AddressTest extends TestCase
             'first_name' =>  'Malcolm',
             'last_name' =>  'Reynolds',
             'phone' =>  '01234 567891',
-            'email' => 'mal@serenity.ship'
+            'email' => 'mal@serenity.ship',
+            'id' => base64_encode('mal@serenity.ship'),
 
         ], $address->jsonSerialize());
     }
+
+    public function testGetId(): void {
+        $address = new Address('Malcolm', 'Reynolds', '01234 567891', 'mal@serenity.ship');
+        self::assertEquals(base64_encode($address->getEmail()),$address->getId());
+    }
+
 }

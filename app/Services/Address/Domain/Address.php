@@ -4,8 +4,31 @@ declare(strict_types=1);
 
 namespace App\Services\Address\Domain;
 
-use App\Http\Requests\AddressPostRequest;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\QueryParameter;
+use App\Services\Address\Application\ApiPlatformAddressProcessor;
+use App\Services\Address\Application\ApiPlatformAddressProvider;
 
+
+#[ApiResource(
+    provider: ApiPlatformAddressProvider::class,
+    processor: ApiPlatformAddressProcessor::class,
+    rules: [
+        'firstName' => [
+            'string', 'required'
+        ],
+        'lastName' => [
+            'string', 'required'
+        ],
+        'phone' => [
+            'regex:/^(\S+)?((((\+44\s?([0–6]|[8–9])\d{3} | \(?0([0–6]|[8–9])\d{3}\)?)\s?\d{3}\s?(\d{2}|\d{3}))|((\+44\s?([0–6]|[8–9])\d{3}|\(?0([0–6]|[8–9])\d{3}\)?)\s?\d{3}\s?(\d{4}|\d{3}))|((\+44\s?([0–6]|[8–9])\d{1}|\(?0([0–6]|[8–9])\d{1}\)?)\s?\d{4}\s?(\d{4}|\d{3}))|((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4})))$/',
+            'required',
+        ],
+        'email' => [
+            'string', 'required'
+        ]
+    ]
+)]
 class Address implements AddressInterface {
     public function __construct(
         private string $firstName,
@@ -56,13 +79,14 @@ class Address implements AddressInterface {
         $this->email = $email;
     }
 
-    public function jsonSerialize(): mixed
+    public function jsonSerialize(): array
     {
         return [
             'first_name' => $this->getFirstName(),
             'last_name' => $this->getLastName(),
             'phone' => $this->getPhone(),
             'email' => $this->getEmail(),
+            'id' => $this->getId()
         ];
     }
 
@@ -72,8 +96,8 @@ class Address implements AddressInterface {
      *
      * @return string
      */
-    public function getUrlSafeEmail(): string
+    public function getId(): string
     {
-        return strtolower(urlencode($this->getEmail()));
+        return base64_encode($this->getEmail());
     }
 }

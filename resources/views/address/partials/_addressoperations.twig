@@ -1,11 +1,11 @@
 <div class="btn-group">
-    <a class="btn btn-info" href="{{ route('address.get', {'id': address.getUrlSafeEmail}) }}">
+    <a class="btn btn-info" href="{{ route('visitor.address.get', {'id': address.getId}) }}">
         View
     </a>
-    <a href="{{ route('address.edit', {
-        'id': address.getUrlSafeEmail()
+    <a href="{{ route('visitor.address.edit', {
+        'id': address.getId()
     }) }}" class="btn btn-primary">Edit</a>
-    <a href="{{ route('address.deleteConfirm', {
-        'id': address.getUrlSafeEmail()
+    <a href="{{ route('visitor.address.deleteConfirm', {
+        'id': address.getId()
     }) }}" class="btn btn-danger">Delete</a>
 </div>
