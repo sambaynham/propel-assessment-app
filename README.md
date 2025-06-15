@@ -10,6 +10,9 @@ This contains our domain logic, and our domain objects.
 At the time of writing, this only include the Address object itself. 
 This is the abstraction we'll be passing around the system. It has both behaviour and state, and enforces its own coherency.
 
+### Service
+The service is a very thing layer that provides a coherent interface for other systems to hide behind, 
+presenting a clear application boundary to the rest of the system. In this case, the service wraps both the ElasticSearch client and AddressRepository. In this way, we know every time a user calls the save against the repo, the index will also be updated.
 
 ### Infrastructure
 This contains the nitty-gritty metal-facing code that's specific to our implementation.
@@ -30,9 +33,10 @@ This is a Proof-of-concept only. It lacks certain key features you'd expect from
 
 ## To-dos
 * ~~Delete address~~ 
-* API Implementation
+* ~~API Implementation~~
 * Search
+  * Elastic search now in place, need to clean up index when entry is deleted.
 * ~~Alerts/Flash messages~~
-* Nicer styling
-* WebComponent-powered Search
-* Error pages
+* ~~Nicer styling~~ <- Not MVP, skipping for now.
+* ~~WebComponent-powered Search~~
+* ~~Error pages~~
