@@ -20,15 +20,58 @@ class AddressController extends Controller
     public function index(Request $request): mixed {
         $pageVars = [
             'pageTitle' => 'Addresses',
-            'addresses' => $this->addressRepository->findAll()
+            'addresses' => $this->addressRepository->findAll(),
+            'breadcrumbs' => [
+                [
+                    'path' => route('address.index'),
+                    'label' =>  'Addresses',
+                    'active' => false
+                ]
+            ]
         ];
         return view('address.index', $pageVars);
+    }
+
+    public function get(Request $request, string $id): mixed {
+        $address = $this->addressRepository->loadById(urldecode($id));
+        if (null === $address) {
+            abort(404);
+        }
+        $pageVars = [
+            'pageTitle' => sprintf("Viewing '%s'", $address->getEmail()),
+            'address' => $address,
+            'breadcrumbs' => [
+                [
+                    'path' => route('address.index'),
+                    'label' =>  'Addresses',
+                    'active' => false
+                ],
+                [
+                    'path' => route('address.get', ['id' => $address->getUrlSafeEmail()]),
+                    'label' =>  $address->getEmail(),
+                    'active' => true
+                ]
+            ]
+        ];
+        return view('address.view', $pageVars);
     }
 
     public function create(Request $request): mixed {
         $pageVars = [
             'pageTitle' => 'Create a new Address',
-            'addresses' => $this->addressRepository->findAll()
+            'addresses' => $this->addressRepository->findAll(),
+            'breadcrumbs' => [
+                [
+                    'path' => route('address.index'),
+                    'label' =>  'Addresses',
+                    'active' => false
+                ],
+                [
+                    'path' => '',
+                    'label' => 'Create',
+                    'active' => true
+                ]
+            ]
         ];
         return view('address.create', $pageVars);
     }
@@ -52,7 +95,24 @@ class AddressController extends Controller
         }
         $pageVars = [
             'pageTitle' => sprintf("Editing '%s'", $address->getEmail()),
-            'address' => $address
+            'address' => $address,
+            'breadcrumbs' => [
+                [
+                    'path' => route('address.index'),
+                    'label' =>  'Addresses',
+                    'active' => false
+                ],
+                [
+                    'path' => route('address.get', ['id' => $address->getUrlSafeEmail()]),
+                    'label' =>  $address->getEmail(),
+                    'active' => true
+                ],
+                [
+                    'path' => route('address.edit', ['id' => $address->getUrlSafeEmail()]),
+                    'label' =>  'Edit',
+                    'active' => true
+                ]
+            ]
         ];
         return view('address.edit', $pageVars);
     }
@@ -77,7 +137,24 @@ class AddressController extends Controller
         }
         $pageVars = [
             'pageTitle' => sprintf("Are you sure you want to delete '%s'?", $address->getEmail()),
-            'address' => $address
+            'address' => $address,
+            'breadcrumbs' => [
+                [
+                    'path' => route('address.index'),
+                    'label' =>  'Addresses',
+                    'active' => false
+                ],
+                [
+                    'path' => route('address.get', ['id' => $address->getUrlSafeEmail()]),
+                    'label' =>  $address->getEmail(),
+                    'active' => true
+                ],
+                [
+                    'path' => route('address.deleteConfirm', ['id' => $address->getUrlSafeEmail()]),
+                    'label' =>  'Delete',
+                    'active' => true
+                ]
+            ]
         ];
         return view('address.delete', $pageVars);
     }

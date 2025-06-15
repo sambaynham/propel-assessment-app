@@ -1,0 +1,8 @@
+<form class="form" method="post" action="{{ route('search.post') }}">
+    {{ csrf_field() }}
+    <div class="input-group my-4">
+        <label class="input-group-text" for="search">Search</label>
+        <input type="text" required name="search-terms" id="search" class="form-control" placeholder="Search by name..." value="{{ old('search-terms') }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>

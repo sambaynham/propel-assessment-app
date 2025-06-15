@@ -6,9 +6,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AddressController;
 
 Route::get('/', [AddressController::class, 'index'])->name('address.index');
-Route::get('/create', [AddressController::class, 'create'])->name('address.create');
-Route::post('/', [AddressController::class, 'post'])->name('address.post');
-Route::get('/{id}', [AddressController::class, 'edit'])->name('address.edit');
-Route::get('/{id}/delete', [AddressController::class, 'deleteConfirm'])->name('address.deleteConfirm');
-Route::delete('/{id}', [AddressController::class, 'delete'])->name('address.delete');
-Route::patch('/{id}', [AddressController::class, 'patch'])->name('address.patch');
+Route::get('/address/create', [AddressController::class, 'create'])->name('address.create');
+Route::post('/address/', [AddressController::class, 'post'])->name('address.post');
+Route::get('/address/{id}', [AddressController::class, 'get'])->name('address.get');
+Route::get('/address/{id}/edit', [AddressController::class, 'edit'])->name('address.edit');
+Route::get('/address/{id}/delete', [AddressController::class, 'deleteConfirm'])->name('address.deleteConfirm');
+Route::delete('/address/{id}', [AddressController::class, 'delete'])->name('address.delete');
+Route::patch('/address/{id}', [AddressController::class, 'patch'])->name('address.patch');
+
+
+Route::post('/search', [\App\Http\Controllers\SearchController::class, 'post'])->name('search.post');

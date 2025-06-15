@@ -8,7 +8,13 @@
     <body>
         <div class="container-fluid">
             {% embed 'base.partials._alerts' %}{% endembed %}
+            {% embed 'base.partials._breadcrumbs' %}{% endembed %}
             <main>
+                <div class="row m-4">
+                    <div class="col">
+                        <h1>{{ pageTitle }}</h1>
+                    </div>
+                </div>
                 {% block content %}
                 {% endblock %}
             </main>

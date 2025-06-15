@@ -22,16 +22,6 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
         'email'
     ];
 
-    /**
-     * @throws MappingException|WriteException|ReadException
-     */
-    public function __construct(private readonly Filesystem $filesystem) {
-        if (!$this->filesystem->exists(self::FILE_NAME)) {
-            $this->makeFile();
-        }
-        $this->collection = $this->decodeFile();
-    }
-
 
     /**
      * By memoizing our data set like this, we keep our 'database' in memory, allowing for much quicker searching.
@@ -42,6 +32,15 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
      */
     private array $collection;
 
+    /**
+     * @throws MappingException|WriteException|ReadException
+     */
+    public function __construct(private readonly Filesystem $filesystem) {
+        if (!$this->filesystem->exists(self::FILE_NAME)) {
+            $this->makeFile();
+        }
+        $this->collection = $this->decodeFile();
+    }
 
     /**
      * @param Address $address
@@ -188,8 +187,8 @@ class AddressRepository implements AddressRepositoryInterface, AddressSearchInte
         $results = [];
         foreach ($this->collection as $item) {
             foreach ($searchTerms as $searchTerm) {
-                if (str_contains($item->getFirstName(), $searchTerm) || str_contains($item->getLastName(), $searchTerm)) {
-                    $results[] = $item;
+                if (str_contains(strtolower($item->getFirstName()), strtolower($searchTerm)) || str_contains(strtolower($item->getLastName()), strtolower($searchTerm)) && !isset($results[$item->getEmail()])) {
+                    $results[$item->getEmail()] = $item;
                 }
             }
         }

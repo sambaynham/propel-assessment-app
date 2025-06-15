@@ -1,0 +1,18 @@
+{% if breadcrumbs is not empty %}
+    <div class="row m-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    {% for breadcrumb in breadcrumbs %}
+
+                        <li class="breadcrumb-item {% if breadcrumb.active == true %} true{% endif %}">
+                            <a href="{{ breadcrumb.path }}">
+                                {{ breadcrumb.label }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </nav>
+        </div>
+    </div>
+{% endif %}

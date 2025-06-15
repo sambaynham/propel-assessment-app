@@ -35,3 +35,4 @@ This is a Proof-of-concept only. It lacks certain key features you'd expect from
 * ~~Alerts/Flash messages~~
 * Nicer styling
 * WebComponent-powered Search
+* Error pages

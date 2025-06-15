@@ -1,0 +1,41 @@
+<table class="table table-bordered table-striped">
+    <thead>
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>E-Mail Address</th>
+        <th>Phone Number</th>
+        <th>Operations</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    {% if addresses is empty %}
+        <tr>
+            <td colspan="5">
+                There are no addresses currently in the system.
+            </td>
+        </tr>
+    {% else %}
+        {% for address in addresses %}
+            <tr>
+                <td>
+                    {{ address.getFirstName }}
+                </td>
+                <td>
+                    {{ address.getLastName }}
+                </td>
+                <td>
+                    {{ address.getPhone }} <a href="tel:{{ address.getPhone }}">Phone Now</a>
+                </td>
+                <td>
+                    {{ address.getEmail }} <a href="mailto:{{ address.getEmail }}">Email Now</a>
+                </td>
+                <td>
+                    {% embed 'address.partials._addressoperations' with {'address': address} %}{% endembed %}
+                </td>
+            </tr>
+        {% endfor %}
+    {% endif %}
+    </tbody>
+</table>
