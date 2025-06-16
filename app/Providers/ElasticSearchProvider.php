@@ -6,26 +6,33 @@ namespace App\Providers;
 
 use App\Services\Search\ElasticSearchService;
 use Elastic\Elasticsearch\ClientBuilder;
-use Illuminate\Support\ServiceProvider;
 use Elastic\Elasticsearch\ClientInterface as ElasticSearchClientInterface;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Support\ServiceProvider;
 
 class ElasticSearchProvider extends ServiceProvider
 {
     /**
      * Register services.
+     * @throws BindingResolutionException
      */
     public function register(): void
     {
 
-        $this->app->bind(ElasticSearchClientInterface::class, function ($app) {
+        $elasticUser = config('elastic.user');
+        $elasticPassword = config('elastic.password');
+        if (!is_string($elasticUser) || !is_string($elasticPassword)) {
+            throw new BindingResolutionException('Elastic search requires username and password');
+        }
+        $this->app->bind(ElasticSearchClientInterface::class, function ($app) use ($elasticUser, $elasticPassword) {
             return ClientBuilder::create()
                 ->setHosts(
                     [
                         'es01:9200'
                     ]
                 )->setBasicAuthentication(
-                    config('elastic.user'),
-                    config('elastic.password')
+                    $elasticUser,
+                    $elasticPassword
                 )
                 ->build();
         });

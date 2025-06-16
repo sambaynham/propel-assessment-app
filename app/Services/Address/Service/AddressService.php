@@ -33,7 +33,7 @@ readonly class AddressService implements AddressServiceInterface
     {
         $this->addressRepository->delete($address);
         try {
-            $this->elasticSearchService->delete($address->getId());
+            $this->elasticSearchService->delete($address->getEmail());
         } catch (ElasticaClientException|ElasticaServerException $e) {
             abort(500, $e->getMessage());
         }

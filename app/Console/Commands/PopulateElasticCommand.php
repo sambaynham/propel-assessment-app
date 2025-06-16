@@ -28,25 +28,18 @@ class PopulateElasticCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Populates Elastic';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        try {
-            $this->elasticSearchService->testConnection();
-        } catch (ElasticaServerException $exception) {
-            $this->error($exception->getMessage());
-            return self::FAILURE;
-        }
-
         $addresses = $this->addressRepository->findAll();
         foreach ($addresses as $address) {
             $this->info(sprintf("Populating %s", $address->getEmail()));
             try {
-                $this->elasticSearchService->populateIndex(ElasticSearchService::INDEX_NAME, $address->jsonSerialize());
+                $this->elasticSearchService->populateIndex($address->jsonSerialize());
             } catch (ElasticaClientException|ElasticaServerException $e) {
                 $this->error($e->getMessage());
                 return self::FAILURE;

@@ -7,7 +7,6 @@ namespace App\Services\Search;
 use App\Services\Address\Domain\Address;
 use App\Services\Address\Infrastructure\AddressSearchInterface;
 use App\Services\Search\Exceptions\ElasticaClientException;
-use App\Services\Search\Exceptions\ElasticaIndexException;
 use App\Services\Search\Exceptions\ElasticaServerException;
 use Elastic\Elasticsearch\ClientInterface as ElasticSearchClientInterface;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
@@ -27,31 +26,15 @@ readonly class ElasticSearchService implements AddressSearchInterface
     }
 
     /**
-     * Test the connection to the Elasticsearch server.
-     *
-     * @throws ElasticaServerException
-     */
-    public function testConnection(): void
-    {
-        try {
-            $this->client->ping();
-        } catch (\Throwable $e) {
-            throw new ElasticaServerException("Connection failed", 0, ...$e);
-        }
-    }
-
-
-    /**
-     * @param string $indexName
      * @return Elasticsearch|Promise
      * @throws ClientResponseException
      * @throws MissingParameterException
      * @throws ServerResponseException
      */
-    public function createIndex(string $indexName): Elasticsearch|Promise
+    public function createIndex(): Elasticsearch|Promise
     {
         $params = [
-            'index' => $indexName,
+            'index' => self::INDEX_NAME,
             'body' => [
                 'settings' => [
                     'number_of_shards' => 1,
@@ -93,9 +76,9 @@ readonly class ElasticSearchService implements AddressSearchInterface
         try {
             return $this->client->index($params);
         } catch(MissingParameterException|ClientResponseException $e) {
-            throw new ElasticaClientException($e->getMessage(), $e->getCode(), ...$e);
+            throw new ElasticaClientException($e->getMessage(), $e->getCode(), $e);
         } catch (ServerResponseException|NoNodeAvailableException $e) {
-            throw new ElasticaServerException($e->getMessage(), $e->getCode(), ...$e);
+            throw new ElasticaServerException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -105,21 +88,56 @@ readonly class ElasticSearchService implements AddressSearchInterface
      * @throws ElasticaClientException
      * @throws ElasticaServerException
      */
-    public function delete(string $id): void
+    public function delete(string $email): void
     {
-        $params = [
-            'index' => self::INDEX_NAME,
-            '_id' => $id
-        ];
-        try {
-            $this->client->delete($params);
-        } catch(MissingParameterException|ClientResponseException $e) {
-            throw new ElasticaClientException($e->getMessage(), $e->getCode(), $e);
-        } catch (ServerResponseException|NoNodeAvailableException $e) {
-            throw new ElasticaServerException($e->getMessage(), $e->getCode(), $e);
+        $indices = $this->findIndicesByEmail($email);
+        foreach ($indices as $id) {
+            $params = [
+                'index' => self::INDEX_NAME,
+                'id' => $id
+            ];
+            try {
+                $this->client->delete($params);
+            } catch(MissingParameterException|ClientResponseException $e) {
+                throw new ElasticaClientException($e->getMessage(), $e->getCode(), $e);
+            } catch (ServerResponseException|NoNodeAvailableException $e) {
+                throw new ElasticaServerException($e->getMessage(), $e->getCode(), $e);
+            }
         }
 
     }
+
+    /**
+     * @throws ElasticaClientException
+     *
+     * @return array<string>
+     */
+    private function findIndicesByEmail(string $email): array {
+        $params = [
+            'index' => self::INDEX_NAME,
+            'body' => [
+                'query' => [
+                    'match' => [
+                        'email' => $email
+                    ]
+                ]
+            ]
+        ];
+        try {
+            $response = $this->client->search($params);
+        }  catch (\Throwable $e) {
+            throw new ElasticaClientException("Client Exception", 0, $e);
+        }
+        $responseArray = $response->asArray();
+        $indices = [];
+        if (count($responseArray['hits']['hits']) > 0) {
+            foreach ($responseArray['hits']['hits'] as $hit) {
+                $indices[] = $hit['_id'];
+            }
+        }
+        return $indices;
+    }
+
     /**
      * @throws ElasticaClientException
      */
@@ -129,16 +147,20 @@ readonly class ElasticSearchService implements AddressSearchInterface
             'index' => self::INDEX_NAME,
             'body' => [
                 'query' => [
-                    'match' => [
-                        'first_name' => implode($searchTerms)
-                    ]
+                    'combined_fields' => [
+                        "query" => implode(' ', $searchTerms),
+                        "fields" => [ "first_name", "last_name", "email"],
+                        "operator" =>   "or"
+                    ],
+
                 ]
             ]
         ];
+
         try {
             $response = $this->client->search($params);
         }  catch (\Throwable $e) {
-            throw new ElasticaClientException("Client Exception", 0, ...$e);
+            throw new ElasticaClientException($e->getMessage(), 0, $e);
         }
 
         $responseArray = $response->asArray();
