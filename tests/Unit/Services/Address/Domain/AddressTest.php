@@ -6,6 +6,7 @@ namespace Tests\Unit\Services\Address\Domain;
 
 use App\Http\Requests\AddressPostRequest;
 use App\Services\Address\Domain\Address;
+use App\Services\Address\Domain\Exceptions\MalformedAddressException;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -15,7 +16,7 @@ class AddressTest extends TestCase
     /**
      * Valid test data provider. Provides all the information in the example as constructor arguments. This is my success condition.
      *
-     * @return iterable
+     * @return iterable<string, array>
      */
     public static function provideValidAddressData(): iterable {
        yield 'david_platt' => [
@@ -29,13 +30,13 @@ class AddressTest extends TestCase
            'firstName' => 'Jason',
            'lastName' => 'Grimshaw',
            'phone' => '01913478123',
-           'email' => 'jason.grimshaw@corrie.co.uk.'
+           'email' => 'jason.grimshaw@corrie.co.uk'
        ];
 
        yield 'ken_barlow' => [
            'firstName' => 'Ken',
            'lastName' => 'Barlow',
-           'phone' => '019134784929',
+           'phone' => '01913478129',
            'email' => 'ken.barlow@corrie.co.uk'
        ];
 
@@ -61,6 +62,7 @@ class AddressTest extends TestCase
      * @param string $email
      *
      * @return void
+     * @throws MalformedAddressException
      */
     #[DataProvider('provideValidAddressData')]
     public function testFullConstruct(
@@ -98,6 +100,65 @@ class AddressTest extends TestCase
     public function testGetId(): void {
         $address = new Address('Malcolm', 'Reynolds', '01234 567891', 'mal@serenity.ship');
         self::assertEquals(base64_encode($address->getEmail()),$address->getId());
+    }
+
+    /**
+     * @return iterable<string, array>
+     */
+    public static function provideInvalidAddressData(): iterable {
+        yield 'malformed_email_address' => [
+            'invalidAddressData' => [
+                'firstName' => 'David',
+                'lastName' => 'Platt',
+                'phone' => '01913478234',
+                'email' => 'david.platt@corrie.co.uk.'
+            ],
+            'expectedExceptionMessage' => "david.platt@corrie.co.uk. is not a valid email address."
+        ];
+
+        yield 'malformed_first_name' => [
+            'invalidAddressData' => [
+                'firstName' => 'David; DROP TABLE users.*',
+                'lastName' => 'Platt',
+                'phone' => '01913478234',
+                'email' => 'david.platt@corrie.co.uk'
+            ],
+            'expectedExceptionMessage' => "The First name 'David; DROP TABLE users.*' contains invalid characters."
+        ];
+
+        yield 'malformed_last_name' => [
+            'invalidAddressData' => [
+                'firstName' => 'David',
+                'lastName' => '<a href=\"dropship.cn\">Click here for great deals on shoes!</a>',
+                'phone' => '01913478234',
+                'email' => 'david.platt@corrie.co.uk'
+            ],
+            'expectedExceptionMessage' => 'The Last name \'<a href=\"dropship.cn\">Click here for great deals on shoes!</a>\' contains invalid characters.'
+        ];
+
+        yield 'malformed_phone' => [
+            'invalidAddressData' => [
+                'firstName' => 'David',
+                'lastName' => 'Platt',
+                'phone' => '0121345678940111244751',
+                'email' => 'david.platt@corrie.co.uk'
+            ],
+            'expectedExceptionMessage' => 'The phone number \'0121345678940111244751\' is not a valid U.K phone number'
+        ];
+    }
+    /**
+     * @param array<string, string> $invalidAddressData
+     * @param string $expectedExceptionMessage
+     * @return void
+     */
+
+    #[DataProvider('provideInvalidAddressData')]
+    public function testGuard(array $invalidAddressData, string $expectedExceptionMessage): void {
+        $this->expectException(MalformedAddressException::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+        new Address(
+            ...$invalidAddressData
+        );
     }
 
 }

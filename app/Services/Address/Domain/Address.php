@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\QueryParameter;
 use App\Services\Address\Application\ApiPlatformAddressProcessor;
 use App\Services\Address\Application\ApiPlatformAddressProvider;
+use App\Services\Address\Domain\Exceptions\MalformedAddressException;
 
 
 #[ApiResource(
@@ -34,13 +35,20 @@ use App\Services\Address\Application\ApiPlatformAddressProvider;
     'page' => new QueryParameter
 ])]
 class Address implements AddressInterface {
+
+    public const string ACCEPTABLE_CHARACTERS_PATTERN = "/[^A-Za-z0-9 \- ']/";
+
+    public const string UK_PHONE_REGEX = '/^(\S+)?((((\+44\s?([0–6]|[8–9])\d{3} | \(?0([0–6]|[8–9])\d{3}\)?)\s?\d{3}\s?(\d{2}|\d{3}))|((\+44\s?([0–6]|[8–9])\d{3}|\(?0([0–6]|[8–9])\d{3}\)?)\s?\d{3}\s?(\d{4}|\d{3}))|((\+44\s?([0–6]|[8–9])\d{1}|\(?0([0–6]|[8–9])\d{1}\)?)\s?\d{4}\s?(\d{4}|\d{3}))|((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4})))$/';
+    /**
+     * @throws MalformedAddressException
+     */
     public function __construct(
         private string $firstName,
         private string $lastName,
         private string $phone,
         private string $email,
     ) {
-
+        $this->guard();
     }
 
     public function getFirstName(): string
@@ -103,5 +111,27 @@ class Address implements AddressInterface {
     public function getId(): string
     {
         return base64_encode($this->getEmail());
+    }
+
+    /**
+     * @return void
+     * @throws MalformedAddressException
+     */
+    private function guard(): void {
+        if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+            throw new MalformedAddressException(sprintf("%s is not a valid email address.", $this->getEmail()));
+        }
+        if (preg_match(self::ACCEPTABLE_CHARACTERS_PATTERN, $this->firstName)) {
+            throw new MalformedAddressException(sprintf("The First name '%s' contains invalid characters.", $this->getFirstName()));
+        }
+        if (preg_match(self::ACCEPTABLE_CHARACTERS_PATTERN, $this->lastName)) {
+            throw new MalformedAddressException(sprintf("The Last name '%s' contains invalid characters.", $this->getLastName()));
+        }
+        if (preg_match(self::ACCEPTABLE_CHARACTERS_PATTERN, $this->lastName)) {
+            throw new MalformedAddressException(sprintf("The Last name '%s' contains invalid characters.", $this->getLastName()));
+        }
+        if (!preg_match(self::UK_PHONE_REGEX, $this->getPhone())) {
+            throw new MalformedAddressException(sprintf("The phone number '%s' is not a valid U.K phone number", $this->getPhone()));
+        }
     }
 }

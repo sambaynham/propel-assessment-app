@@ -26,13 +26,13 @@ class AddressRepositoryTest extends TestCase
         [
             'firstName' => 'Jason',
             'lastName' => 'Grimshaw',
-            'phone' => '01913478123',
-            'email' => 'jason.grimshaw@corrie.co.uk.'
+            'phone' => '01234567891',
+            'email' => 'jason.grimshaw@corrie.co.uk'
         ],
         [
             'firstName' => 'Ken',
             'lastName' => 'Barlow',
-            'phone' => '019134784929',
+            'phone' => '01913478492',
             'email' => 'ken.barlow@corrie.co.uk'
         ],
         [
