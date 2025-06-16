@@ -14,6 +14,4 @@ Route::get('/address/{id}/edit', [AddressController::class, 'edit'])->name('visi
 Route::get('/address/{id}/delete', [AddressController::class, 'deleteConfirm'])->name('visitor.address.deleteConfirm');
 Route::delete('/address/{id}', [AddressController::class, 'delete'])->name('visitor.address.delete');
 Route::patch('/address/{id}', [AddressController::class, 'patch'])->name('visitor.address.patch');
-
-
 Route::post('/search', [SearchController::class, 'post'])->name('visitor.search.post');
